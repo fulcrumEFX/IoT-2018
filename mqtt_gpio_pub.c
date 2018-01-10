@@ -3,13 +3,14 @@
 #include <mosquitto.h>
 #include <stdlib.h>
 #include <wiringPi.h>
+#include <time.h>
 
 
-#define MQTT_HOSTNAME "localhost"
+#define MQTT_HOSTNAME "10.24.3.66"
 #define MQTT_PORT 1883
 #define MQTT_USERNAME ""
 #define MQTT_PASSWORD ""
-#define MQTT_TOPIC "from_Client_01"
+#define MQTT_TOPIC "test2"
 
 int publish(char text[]){
 	struct mosquitto *mosq = NULL;
@@ -28,7 +29,7 @@ int publish(char text[]){
 		printf("Can't connect to Mosquitto Server");
 		return 1;
 	}
-	ret = mosquitto_publish(mosq, NULL, MQTT_TOPIC, strlen(text), text, 0, false);
+	ret = mosquitto_publish(mosq, NULL, MQTT_TOPIC, strlen(text), text, 1, false);
 	
 	mosquitto_disconnect(mosq);
 	mosquitto_destroy(mosq);
@@ -42,6 +43,11 @@ int main(int argc, char *argv[])
 	int R;
 	int comp;
 	int _gpio_pin = atoi(argv[1]);
+	char buffer[100], timestr[95];
+	time_t rawtime;
+	struct tm* timeinfo;
+	char *Meldung[] = {"LOW", "HIGH"};
+	
 	if(wiringPiSetup() == -1)
 	{
 		puts("FEHLER");
@@ -54,8 +60,12 @@ int main(int argc, char *argv[])
 	while(1){
 		R=digitalRead(_gpio_pin);
 		if(R != comp){
-			if(R==0) publish("low");
-			if(R==1) publish("high");
+			rawtime = time(0);
+			timeinfo = localtime (&rawtime);
+			strftime(timestr, 90, "%e/%m/%Y %X", timeinfo);
+			sprintf(buffer, "%s: %s",  timestr, Meldung[R] );
+			publish(buffer);
+			printf("%s", buffer);
 			delay(100);
 		}
 		comp = R;

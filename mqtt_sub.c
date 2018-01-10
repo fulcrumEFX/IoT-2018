@@ -4,11 +4,11 @@
 #include <stdlib.h>
 #include <mysql/mysql.h>		//`mysql_config --cflags --libs`
 
-#define MQTT_HOSTNAME "localhost"
+#define MQTT_HOSTNAME "10.24.3.66"
 #define MQTT_PORT 1883
 #define MQTT_USERNAME ""
 #define MQTT_PASSWORD ""
-#define MQTT_TOPIC_1 "from_Client_01"
+#define MQTT_TOPIC_1 "test2"
 #define MQTT_TOPIC_2 "from_Client_02"
 #define MQTT_TOPIC_3 "from_Client_03"
 
