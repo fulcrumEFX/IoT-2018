@@ -14,30 +14,25 @@
 int publish(char text[]){
 	struct mosquitto *mosq = NULL;
 	int ret;
-	//char text[50];
 	
+	mosquitto_lib_init();
+		
+	mosq = mosquitto_new(NULL, true, NULL);
+	if(!mosq){
+		printf("Can't initialize Mosquitto library");
+		return 1;
+	}
+	mosquitto_username_pw_set(mosq, MQTT_USERNAME, MQTT_PASSWORD);
+	ret = mosquitto_connect(mosq, MQTT_HOSTNAME, MQTT_PORT, 0);
+	if (ret){
+		printf("Can't connect to Mosquitto Server");
+		return 1;
+	}
+	ret = mosquitto_publish(mosq, NULL, MQTT_TOPIC, strlen(text), text, 0, false);
 	
-		//strcpy(text, argv[1]);
-		
-		mosquitto_lib_init();
-		
-		mosq = mosquitto_new(NULL, true, NULL);
-		if(!mosq){
-			printf("Can't initialize Mosquitto library");
-			return 1;
-		}
-		mosquitto_username_pw_set(mosq, MQTT_USERNAME, MQTT_PASSWORD);
-		ret = mosquitto_connect(mosq, MQTT_HOSTNAME, MQTT_PORT, 0);
-		if (ret){
-			printf("Can't connect to Mosquitto Server");
-			return 1;
-		}
-		ret = mosquitto_publish(mosq, NULL, MQTT_TOPIC, strlen(text), text, 0, false);
-		
-		mosquitto_disconnect(mosq);
-		mosquitto_destroy(mosq);
-		mosquitto_lib_cleanup();
-	
+	mosquitto_disconnect(mosq);
+	mosquitto_destroy(mosq);
+	mosquitto_lib_cleanup();
 	return 0;
 }
 
@@ -61,7 +56,6 @@ int main(int argc, char *argv[])
 		if(R != comp){
 			if(R==0) publish("low");
 			if(R==1) publish("high");
-			//publish("-> %i\n",R);
 			delay(100);
 		}
 		comp = R;
