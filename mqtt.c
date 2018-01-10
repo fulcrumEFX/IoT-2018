@@ -2,7 +2,7 @@
 #include <string.h>
 #include <mosquitto.h>
 #include <stdlib.h>
-#include <mysql.h>
+
 
 #define MQTT_HOSTNAME "localhost"
 #define MQTT_PORT 1883
@@ -13,6 +13,7 @@
 #define MQTT_TOPIC_2 "from_Client_02"
 #define MQTT_TOPIC_3 "from_Client_03"
 
+/*
 void onConnect(struct mosquitto *mosq, void *userdata, int result){
 	if (!result) mosquitto_subscribe(mosq, NULL, MQTT_TOPIC_1, 1);
 	else printf("Error: Failed to connect");
@@ -65,7 +66,7 @@ int WriteDataBase( int X1, int X2, char msg[50]){
 	mysql_library_end;
 	return 0;
 }
-
+*/
 
 int main(int argc, char *argv[]){
 	struct mosquitto *mosq = NULL;
