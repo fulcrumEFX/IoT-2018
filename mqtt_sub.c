@@ -15,7 +15,7 @@
 //SQL Connect parameters
 static char *hostname = "localhost";
 static char *username = "root";
-static char *password = "123456789";
+static char *password = "iot2018";
 static char *database = "EddyDB";
 static char *socketname = NULL;
 unsigned int port = 3306;

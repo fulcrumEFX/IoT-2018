@@ -2,6 +2,7 @@
 #include <string.h>
 #include <mosquitto.h>
 #include <stdlib.h>
+#include <wiringPi.h>
 
 
 #define MQTT_HOSTNAME "localhost"
@@ -10,16 +11,13 @@
 #define MQTT_PASSWORD ""
 #define MQTT_TOPIC "from_Client_01"
 
-
-
-
-int main(int argc, char *argv[]){
+int publish(char text[]){
 	struct mosquitto *mosq = NULL;
 	int ret;
-	char text[50];
+	//char text[50];
 	
-	if(argc == 2){
-		strcpy(text, argv[1]);
+	
+		//strcpy(text, argv[1]);
 		
 		mosquitto_lib_init();
 		
@@ -39,6 +37,35 @@ int main(int argc, char *argv[]){
 		mosquitto_disconnect(mosq);
 		mosquitto_destroy(mosq);
 		mosquitto_lib_cleanup();
+	
+	return 0;
+}
+
+
+int main(int argc, char *argv[])
+{
+	int R;
+	int comp;
+	int _gpio_pin = atoi(argv[1]);
+	if(wiringPiSetup() == -1)
+	{
+		puts("FEHLER");
+		return 1;
+	}
+	puts("LÄUFT");
+	pinMode(_gpio_pin, OUTPUT);
+	
+	puts("MIT Strg C ABBRECHEN");
+	while(1){
+		R=digitalRead(_gpio_pin);
+		if(R != comp){
+			if(R==0) publish("low");
+			if(R==1) publish("high");
+			//publish("-> %i\n",R);
+			delay(100);
+		}
+		comp = R;
 	}
 	return 0;
 }
+
