@@ -3,14 +3,23 @@
 #include <mosquitto.h>
 #include <stdlib.h>
 #include <mysql/mysql.h>		//`mysql_config --cflags --libs`
+#include <time.h>
 
-#define MQTT_HOSTNAME "10.24.3.66"
+#define MQTT_HOSTNAME "iot.eclipse.org"
 #define MQTT_PORT 1883
 #define MQTT_USERNAME ""
 #define MQTT_PASSWORD ""
-#define MQTT_TOPIC_1 "test2"
-#define MQTT_TOPIC_2 "from_Client_02"
-#define MQTT_TOPIC_3 "from_Client_03"
+#define MQTT_TOPIC_1 "iotthm"
+#define MQTT_TOPIC_2 "test17"
+#define MQTT_TOPIC_3 "test01"
+#define MQTT_TOPIC_4 "test14"
+#define MQTT_TOPIC_5 "test18"
+#define MQTT_TOPIC_6 "test19"
+#define MQTT_TOPIC_7 "test20"
+#define MQTT_TOPIC_8 "test13"
+#define MQTT_TOPIC_9 "test12"
+#define MQTT_TOPIC_10 "test11"
+#define MQTT_QOS 1
 
 //SQL Connect parameters
 static char *hostname = "localhost";
@@ -22,15 +31,28 @@ unsigned int port = 3306;
 unsigned int flag = 0;
 
 void onConnect(struct mosquitto *mosq, void *userdata, int result){
-	if (!result) mosquitto_subscribe(mosq, NULL, MQTT_TOPIC_1, 1);
+	if (!result){
+		 mosquitto_subscribe(mosq, NULL, MQTT_TOPIC_1, MQTT_QOS);
+		/* mosquitto_subscribe(mosq, NULL, MQTT_TOPIC_2, MQTT_QOS);
+		 mosquitto_subscribe(mosq, NULL, MQTT_TOPIC_3, MQTT_QOS);
+		 mosquitto_subscribe(mosq, NULL, MQTT_TOPIC_4, MQTT_QOS);
+		 mosquitto_subscribe(mosq, NULL, MQTT_TOPIC_5, MQTT_QOS);
+		 mosquitto_subscribe(mosq, NULL, MQTT_TOPIC_6, MQTT_QOS);
+		 mosquitto_subscribe(mosq, NULL, MQTT_TOPIC_7, MQTT_QOS);
+		 mosquitto_subscribe(mosq, NULL, MQTT_TOPIC_8, MQTT_QOS);
+		 mosquitto_subscribe(mosq, NULL, MQTT_TOPIC_9, MQTT_QOS);
+		 mosquitto_subscribe(mosq, NULL, MQTT_TOPIC_10, MQTT_QOS); */
+	 }
 	else printf("Error: Failed to connect");
 }
 
-int WriteDataBase( int X1, int X2, char msg[50]){
+int WriteDataBase( const struct mosquitto_message *message){
 	MYSQL *conn;
 	MYSQL *err;
 	int res;
-	char sqlString[80];
+	char sqlString[200], timestr[50];
+	time_t rawtime;
+	struct tm* timeinfo;
 	
 	mysql_library_init(0, NULL, NULL);
 	
@@ -46,7 +68,10 @@ int WriteDataBase( int X1, int X2, char msg[50]){
 		mysql_close(conn);
 		return 1;
 	}
-	sprintf(sqlString, "INSERT INTO Tabelle01(X1,X2,msg) VALUES (%i, %i, '%s');", X1, X2, msg);
+	rawtime = time(0);
+	timeinfo = localtime (&rawtime);
+	strftime(timestr, 90, "%e/%m/%Y %X", timeinfo);
+	sprintf(sqlString, "INSERT INTO gpio_status(Broker, Topic, Message, QOS, retain, Time_received) VALUES ('%s', '%s', '%s', %i, %i, '%s');",MQTT_HOSTNAME, (char*)message->topic, (char*)message->payload, message->qos, message->retain, timestr);
 	
 	res = mysql_query(conn, sqlString);
 	if(res){
@@ -59,16 +84,12 @@ int WriteDataBase( int X1, int X2, char msg[50]){
 	return 0;
 }
 void onMessage(struct mosquitto *mosq, void *userdata, const struct mosquitto_message *message){
-	int X1, X2;
-	char msg[50];
 	int cnt = 0;
 	
 	if(message->payloadlen){
 		printf("%i: %i go/retain [%i/%i]: qual Topic: %s, Message: %s\n", cnt++, message->mid, message->qos, message->retain, (char*)message->topic, (char*)message->payload);
-		X1 = 0;
-		X2 = 0;
-		strcpy(msg, message->payload);
-		if(message->retain==0) WriteDataBase(X1, X2, msg);
+		cnt++;
+		if(message->retain==0) WriteDataBase(message);
 	}else{
 		printf("Topic: %s, Message: (null)\n", message->topic);
 	}
@@ -77,7 +98,7 @@ void onMessage(struct mosquitto *mosq, void *userdata, const struct mosquitto_me
 
 
 int main(){
-	int keepalive = 1;
+	int keepalive = 0;
 	bool clean_session = true;
 	struct mosquitto *mosq = NULL;
 	mosquitto_lib_init();

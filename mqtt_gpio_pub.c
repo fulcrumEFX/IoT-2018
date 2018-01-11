@@ -6,11 +6,12 @@
 #include <time.h>
 
 
-#define MQTT_HOSTNAME "10.24.3.66"
+#define MQTT_HOSTNAME "iot.eclipse.org"
 #define MQTT_PORT 1883
 #define MQTT_USERNAME ""
 #define MQTT_PASSWORD ""
-#define MQTT_TOPIC "test2"
+#define MQTT_TOPIC "iotthm"
+#define MQTT_QOS 1
 
 int publish(char text[]){
 	struct mosquitto *mosq = NULL;
@@ -29,7 +30,7 @@ int publish(char text[]){
 		printf("Can't connect to Mosquitto Server");
 		return 1;
 	}
-	ret = mosquitto_publish(mosq, NULL, MQTT_TOPIC, strlen(text), text, 1, false);
+	ret = mosquitto_publish(mosq, NULL, MQTT_TOPIC, strlen(text), text, MQTT_QOS, false);
 	
 	mosquitto_disconnect(mosq);
 	mosquitto_destroy(mosq);
@@ -65,7 +66,7 @@ int main(int argc, char *argv[])
 			strftime(timestr, 90, "%e/%m/%Y %X", timeinfo);
 			sprintf(buffer, "%s: %s",  timestr, Meldung[R] );
 			publish(buffer);
-			printf("%s", buffer);
+			puts("Message sent");
 			delay(100);
 		}
 		comp = R;
