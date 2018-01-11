@@ -5,7 +5,7 @@
  
 </script>
  
-<meta http-quiv="refresh" content=1>
+<meta http-equiv="refresh" content=10>
 </head>
  
 <style>
