@@ -45,14 +45,25 @@ void onConnect(struct mosquitto *mosq, void *userdata, int result){
 	 }
 	else printf("Error: Failed to connect");
 }
+void getLocalTime(char * _addr){
+	time_t rawtime;
+	struct tm* timeinfo;
+	char timestr[50];
+	
+	rawtime = time(0);
+	timeinfo = localtime(&rawtime);
+	strftime(timestr, 50, "%e/%m/%Y %X", timeinfo);
+	
+	strcpy(_addr, timestr);
+	return;
+	
+}
 
 int WriteDataBase( const struct mosquitto_message *message){
 	MYSQL *conn;
 	MYSQL *err;
 	int res;
 	char sqlString[200], timestr[50];
-	time_t rawtime;
-	struct tm* timeinfo;
 	
 	mysql_library_init(0, NULL, NULL);
 	
@@ -68,10 +79,8 @@ int WriteDataBase( const struct mosquitto_message *message){
 		mysql_close(conn);
 		return 1;
 	}
-	rawtime = time(0);
-	timeinfo = localtime (&rawtime);
-	strftime(timestr, 90, "%e/%m/%Y %X", timeinfo);
-	sprintf(sqlString, "INSERT INTO gpio_status(Broker, Topic, Message, QOS, retain, Time_received) VALUES ('%s', '%s', '%s', %i, %i, '%s');",MQTT_HOSTNAME, (char*)message->topic, (char*)message->payload, message->qos, message->retain, timestr);
+	getLocalTime(timestr);
+	sprintf(sqlString, "INSERT INTO gpio_status(Broker, Topic, Message, QOS, Time_received) VALUES ('%s', '%s', '%s', %i, '%s');",MQTT_HOSTNAME, (char*)message->topic, (char*)message->payload, message->qos, timestr);
 	
 	res = mysql_query(conn, sqlString);
 	if(res){
@@ -98,7 +107,7 @@ void onMessage(struct mosquitto *mosq, void *userdata, const struct mosquitto_me
 
 
 int main(){
-	int keepalive = 0;
+	int retain = 0;
 	bool clean_session = true;
 	struct mosquitto *mosq = NULL;
 	mosquitto_lib_init();
@@ -106,7 +115,7 @@ int main(){
 	mosquitto_username_pw_set(mosq, MQTT_USERNAME, MQTT_PASSWORD);
 	mosquitto_connect_callback_set(mosq, onConnect);
 	mosquitto_message_callback_set(mosq, onMessage);
-	mosquitto_connect(mosq, MQTT_HOSTNAME, MQTT_PORT, keepalive);
+	mosquitto_connect(mosq, MQTT_HOSTNAME, MQTT_PORT, retain);
 	puts("...working");
 	while(!mosquitto_loop_forever(mosq, 0, 1)){}
 	

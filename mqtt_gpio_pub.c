@@ -38,15 +38,29 @@ int publish(char text[]){
 	return 0;
 }
 
+void getLocalTime(char * _addr){
+	time_t rawtime;
+	struct tm* timeinfo;
+	char timestr[50];
+	
+	rawtime = time(0);
+	timeinfo = localtime(&rawtime);
+	strftime(timestr, 50, "%e/%m/%y %X", timeinfo);
+	
+	strcpy(_addr, timestr);
+	return;
+	
+}
+
+
 
 int main(int argc, char *argv[])
 {
 	int R;
 	int comp;
 	int _gpio_pin = atoi(argv[1]);
-	char buffer[100], timestr[95];
-	time_t rawtime;
-	struct tm* timeinfo;
+	char buffer[100], timestr[50];
+
 	char *Meldung[] = {"LOW", "HIGH"};
 	
 	if(wiringPiSetup() == -1)
@@ -61,12 +75,9 @@ int main(int argc, char *argv[])
 	while(1){
 		R=digitalRead(_gpio_pin);
 		if(R != comp){
-			rawtime = time(0);
-			timeinfo = localtime (&rawtime);
-			strftime(timestr, 90, "%e/%m/%Y %X", timeinfo);
-			sprintf(buffer, "%s: %s",  timestr, Meldung[R] );
+			getLocalTime(timestr);
+			sprintf(buffer, "%s: %s", timestr, Meldung[R]);
 			publish(buffer);
-			puts("Message sent");
 			delay(100);
 		}
 		comp = R;
