@@ -5,11 +5,11 @@
 #include <mysql/mysql.h>		//`mysql_config --cflags --libs`
 #include <time.h>
 
-#define MQTT_HOSTNAME "iot.eclipse.org"
+#define MQTT_HOSTNAME "10.24.3.66"
 #define MQTT_PORT 1883
 #define MQTT_USERNAME ""
 #define MQTT_PASSWORD ""
-#define MQTT_TOPIC_1 "iotthm"
+#define MQTT_TOPIC_1 "test15"
 #define MQTT_TOPIC_2 "test17"
 #define MQTT_TOPIC_3 "test01"
 #define MQTT_TOPIC_4 "test14"
@@ -33,7 +33,7 @@ unsigned int flag = 0;
 void onConnect(struct mosquitto *mosq, void *userdata, int result){
 	if (!result){
 		 mosquitto_subscribe(mosq, NULL, MQTT_TOPIC_1, MQTT_QOS);
-		/* mosquitto_subscribe(mosq, NULL, MQTT_TOPIC_2, MQTT_QOS);
+		 mosquitto_subscribe(mosq, NULL, MQTT_TOPIC_2, MQTT_QOS);
 		 mosquitto_subscribe(mosq, NULL, MQTT_TOPIC_3, MQTT_QOS);
 		 mosquitto_subscribe(mosq, NULL, MQTT_TOPIC_4, MQTT_QOS);
 		 mosquitto_subscribe(mosq, NULL, MQTT_TOPIC_5, MQTT_QOS);
@@ -41,7 +41,7 @@ void onConnect(struct mosquitto *mosq, void *userdata, int result){
 		 mosquitto_subscribe(mosq, NULL, MQTT_TOPIC_7, MQTT_QOS);
 		 mosquitto_subscribe(mosq, NULL, MQTT_TOPIC_8, MQTT_QOS);
 		 mosquitto_subscribe(mosq, NULL, MQTT_TOPIC_9, MQTT_QOS);
-		 mosquitto_subscribe(mosq, NULL, MQTT_TOPIC_10, MQTT_QOS); */
+		 mosquitto_subscribe(mosq, NULL, MQTT_TOPIC_10, MQTT_QOS);
 	 }
 	else printf("Error: Failed to connect");
 }
@@ -125,3 +125,4 @@ int main(){
 	
 	return 0;
 } 
+
